@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AddressBook>
+	<pbgroup>
+		<id>1</id>
+		<name>Blacklist</name>
+	</pbgroup>
+	<pbgroup>
+		<id>2</id>
+		<name>Whitelist</name>
+	</pbgroup>
+	<pbgroup>
+		<id>7</id>
+		<name>Gamers</name>
+	</pbgroup>
+	<pbgroup>
+		<id>8</id>
+		<name>Dancers</name>
+	</pbgroup>
+	<Contact>
+		<id>7</id>
+		<FirstName>Patrick</FirstName>
+		<LastName>Pascual</LastName>
+		<Frequent>0</Frequent>
+		<Phone type="Work">
+			<phonenumber>101</phonenumber>
+			<accountindex>0</accountindex>
+		</Phone>
+		<Group>8</Group>
+		<Primary>0</Primary>
+	</Contact>
+	<Contact>
+		<id>6</id>
+		<FirstName>Rendell</FirstName>
+		<LastName>Pascual</LastName>
+		<Frequent>0</Frequent>
+		<Phone type="Work">
+			<phonenumber>100</phonenumber>
+			<accountindex>0</accountindex>
+		</Phone>
+		<Group>7</Group>
+		<Primary>0</Primary>
+	</Contact>
+</AddressBook>
