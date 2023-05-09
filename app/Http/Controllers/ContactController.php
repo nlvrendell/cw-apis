@@ -146,7 +146,7 @@ class ContactController extends Controller
         $category = ($type == 'department') ? 'group' : 'site';
 
         // // if the contact person has data on category return the group id
-        if (array_key_exists($category, $contact) && ! $contact[$category]) {
+        if (array_key_exists($category, $contact) && $contact[$category] !== '') {
             return array_search($contact[$category], $groups);
         }
 
