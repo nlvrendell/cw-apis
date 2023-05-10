@@ -19,21 +19,11 @@ class ContactController extends Controller
         // return 'api is here';
         $bearerToken = $request->bearerToken();
 
-        if (! $bearerToken) {
-            return response()->json(['error' => 'Unauthorized bearer token'], 404);
-        }
-
-        if (! $request->input('domain')) {
-            return response()->json(['error' => 'Domain is required'], 404);
-        }
-
-        if (! $request->input('type')) {
-            return response()->json(['error' => 'Type is required'], 404);
-        }
-
-        if (! $request->input('mac')) {
-            return response()->json(['error' => 'Mac is required'], 404);
-        }
+        $validator = $request->validate([
+            'domain' => 'required|in:department,sites',
+            'type' => 'required',
+            'mac' => 'required',
+        ]);
 
         // validate the mac address
         $isDeviceExist = $this->validateMac($bearerToken, $request->input('mac'));
