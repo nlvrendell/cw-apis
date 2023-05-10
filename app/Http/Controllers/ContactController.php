@@ -20,34 +20,41 @@ class ContactController extends Controller
         $bearerToken = $request->bearerToken();
 
         if (! $bearerToken) {
-            return response()->json(['error' => 'Unauthorized bearer token'], 401);
+            return response()->json(['error' => 'Unauthorized bearer token'], 404);
         }
 
         if (! $request->input('domain')) {
-            return response()->json(['error' => 'Domain is required'], 401);
+            return response()->json(['error' => 'Domain is required'], 404);
         }
 
         if (! $request->input('type')) {
-            return response()->json(['error' => 'Type is required'], 401);
+            return response()->json(['error' => 'Type is required'], 404);
+        }
+
+        if (! $request->input('mac')) {
+            return response()->json(['error' => 'Mac is required'], 404);
+        }
+
+        // validate the mac address
+        $isDeviceExist = $this->validateMac($bearerToken, $request->input('mac'));
+        if(!$isDeviceExist){
+            return response()->json(['error' => 'Mac is invalid'], 404);
         }
 
         $groupings = $request->input('type') == 'site' ? $this->sites($bearerToken, $request->domain) : $this->departments($bearerToken, $request->domain);
         $groups = $groupings->json();
 
-        // Adding others and shared
+        // Adding others
         if ((array_search('Others', $groups)) == false || (array_search('others', $groups)) == false) {
             array_push($groups, 'Others');
         }
 
-        // Adding others
+        // Adding shared
         if ((array_search('Shared', $groups)) == false || (array_search('shared', $groups)) == false) {
             array_push($groups, 'Shared');
         }
 
-        // return $groupings->json();
         $contacts = $this->contacts($bearerToken, $request->domain);
-
-        // return $hold = $contacts->json();
 
         // initialized xml object
         $xmlobj = new \SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><AddressBook></AddressBook>');
@@ -56,7 +63,10 @@ class ContactController extends Controller
         $xmlobj = $this->groupToXML($xmlobj, $groups);
         $xmlobj = $this->contactToXML($xmlobj, $contacts->json(), $groups, $request->input('type'));
 
-        return $xmlobj->asXML();
+        // return $xmlobj->asXML();
+
+        return response($xmlobj->asXML(), 200)
+                  ->header('Content-Type', 'text/plain');
     }
 
     public function departments($token, $domain)
@@ -88,9 +98,6 @@ class ContactController extends Controller
             $group->addChild('id', htmlspecialchars($key));
             $group->addChild('name', htmlspecialchars($data));
         }
-
-        // $group->addChild('id', htmlspecialchars($groups));
-        // $group->addChild('name', htmlspecialchars($data));
 
         return $xmlobj;
     }
@@ -136,5 +143,15 @@ class ContactController extends Controller
 
         // if the contact person dont have data on category used the others id
         return array_search('Others', $groups);
+    }
+
+    public function validateMac($token, $mac){
+        $device = Http::withToken($token)
+            ->post($this->cw_base_api.'?object=mac&action=read&format=json&mac='.$mac.'');
+            
+        $hold = $device->json()[0] ?? null; // 0 = first data
+       
+        // if auth user and pass exist then device exist
+        return (isset($hold['auth_user']) && isset($hold['auth_pass'])) ? true : false;
     }
 }
