@@ -19,3 +19,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::get('/phonebook', [\App\Http\Controllers\ContactController::class, 'index']);
+
+Route::get('/greeting', function () {
+    return 'Hello World';
+});

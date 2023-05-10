@@ -49,25 +49,6 @@ class ContactController extends Controller
 
         // return $hold = $contacts->json();
 
-        // foreach ($hold as $key => $contact) {
-        //     // $category = ($request->input('type') == 'department') ? 'group' : 'site';
-
-        //     if (array_key_exists('group', $contact)) {
-        //         echo $contact['group'];
-        //     } else {
-        //         echo 'wala';
-        //     }
-        //     // $category = 'group';
-
-        //     // if ((array_search($category, $contact)) !== false) {
-        //     //     echo $contact['group'];
-        //     // } else {
-        //     //     echo 'Others';
-        //     // }
-        // }
-
-        // return 'end';
-
         // initialized xml object
         $xmlobj = new \SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><AddressBook></AddressBook>');
 
@@ -98,7 +79,6 @@ class ContactController extends Controller
 
     public function groupToXML($xmlobj, $groups)
     {
-
         if (($key = array_search('n/a', $groups)) !== false) {
             unset($groups[$key]);
         }
@@ -126,7 +106,11 @@ class ContactController extends Controller
 
             $phone = $contact->addChild('Phone');
             $phone->addAttribute('type', 'Work');
-            $phone->addChild('phonenumber', htmlspecialchars(100));
+
+            // if workphone exist use it, if not use the contact extensiont = user column
+            $phoneNumber = array_key_exists('work_phone', $data) && $data['work_phone'] !== '' ? $data['work_phone'] : $data['user'];
+
+            $phone->addChild('phonenumber', htmlspecialchars($phoneNumber));
             $phone->addChild('accountindex', htmlspecialchars(0));
 
             $contact->addChild('Group', htmlspecialchars($this->identifyGroup($data, $groups, $type))); // there should be a group identification here
@@ -138,19 +122,19 @@ class ContactController extends Controller
 
     public function identifyGroup($contact, $groups, $type)
     {
-        // if the contact person is shared return the shared id array_search('n/a', $groups))
+        // if the contact person is shared return the shared id 
         if ((array_search('Shared', $contact)) !== false) {
             return array_search('Shared', $groups);
         }
 
         $category = ($type == 'department') ? 'group' : 'site';
 
-        // // if the contact person has data on category return the group id
+        // if the contact person has data on category return the group id
         if (array_key_exists($category, $contact) && $contact[$category] !== '') {
             return array_search($contact[$category], $groups);
         }
 
-        // if the contact person dont have data on category return the others id
+        // if the contact person dont have data on category used the others id
         return array_search('Others', $groups);
     }
 }
